@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     components::*,
-    entities::{PlayerComponents, AsteroidComponents},
+    entities::{AsteroidComponents, PlayerComponents},
     resources::{ArenaData, AssetHandles},
 };
 
@@ -55,7 +55,7 @@ pub fn setup(
             drag: Drag::new(0.4, 0.0),
             ..Default::default()
         });
-    
+
     // Test asteroid
     // commands.spawn(SpriteComponents {
     //     material: materials.add(asteroid_texture.into()),

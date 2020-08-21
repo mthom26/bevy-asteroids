@@ -2,13 +2,14 @@
 
 use bevy::{
     app::ScheduleRunnerPlugin, input::keyboard::KeyboardInputState, input::mouse::MouseMotion,
-    prelude::*, render::pass::ClearColor, window::CursorMoved,  
+    prelude::*, render::pass::ClearColor, window::CursorMoved,
 };
 
-use bevy::{
-    core::CorePlugin, transform::TransformPlugin, input::InputPlugin, window::WindowPlugin, asset::AssetPlugin, render::RenderPlugin,
-    sprite::SpritePlugin, type_registry::TypeRegistryPlugin, diagnostic::DiagnosticsPlugin, pbr::PbrPlugin, winit::WinitPlugin, wgpu::WgpuPlugin
-};
+// use bevy::{
+//     asset::AssetPlugin, core::CorePlugin, diagnostic::DiagnosticsPlugin, input::InputPlugin,
+//     pbr::PbrPlugin, render::RenderPlugin, sprite::SpritePlugin, transform::TransformPlugin,
+//     type_registry::TypeRegistryPlugin, wgpu::WgpuPlugin, window::WindowPlugin, winit::WinitPlugin,
+// };
 
 mod components;
 mod entities;
@@ -24,8 +25,8 @@ use systems::{
 fn main() {
     App::build()
         // ScheduleRunnerPlugin has no effect
-        // .add_plugin(ScheduleRunnerPlugin::run_loop(std::time::Duration::from_secs_f32(0.1)))
-        .add_default_plugins()        
+        // .add_plugin(ScheduleRunnerPlugin::run_loop(std::time::Duration::from_secs_f32(1.0 / 60.0)))
+        .add_default_plugins()
         // .add_plugin(TypeRegistryPlugin::default())
         // .add_plugin(CorePlugin::default())
         // .add_plugin(TransformPlugin::default())
