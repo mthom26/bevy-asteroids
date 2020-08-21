@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::{
     components::*,
     utils::{cursor_pos_to_world_pos, rotate_vec2},
+    events::SpawnProjectileEvent,
     CursorPos,
 };
 
@@ -22,6 +23,8 @@ pub fn player_input_system(
     time: Res<Time>,
     mouse_input_state: Res<CursorPos>,
     keyboard_input: Res<Input<KeyCode>>,
+    mouse_input: Res<Input<MouseButton>>,
+    mut my_events: ResMut<Events<SpawnProjectileEvent>>,
     // cursor_moved_events: Res<Events<CursorMoved>>,
     mut query: Query<(
         &Player,
@@ -29,6 +32,7 @@ pub fn player_input_system(
         &Rot,
         &mut Velocity,
         &mut AngularVelocity,
+        &mut Weapon,
     )>,
 ) {
     let mut x = 0.0;
@@ -53,7 +57,7 @@ pub fn player_input_system(
         Vec2::zero()
     };
 
-    for (_player, pos, rot, mut velocity, mut ang_velocity) in &mut query.iter() {
+    for (_player, pos, rot, mut velocity, mut ang_velocity, mut weapon) in &mut query.iter() {
         let input_vec = rotate_vec2(&input_vec, rot.0);
         let input_vec = Vec3::new(input_vec.x(), input_vec.y(), 0.0);
         velocity.0 += input_vec * time.delta_seconds * 200.0;
@@ -86,5 +90,19 @@ pub fn player_input_system(
         // println!("tgt_ang_vel: {}", tgt_ang_vel);
         // println!("ang_vel: {}", ang_velocity.0);
         // println!();
+
+
+        // Decrement Weapon reload time, this should probably be in another system
+        // but it is fine here for now
+        weapon.reload_timer -= time.delta_seconds;
+
+        if mouse_input.pressed(MouseButton::Left) && weapon.reload_timer <= 0.0 {
+            // println!("Player Shoot");
+            weapon.reload_timer = weapon.reload_speed;
+            my_events.send(SpawnProjectileEvent {
+                pos: Translation::new(pos.x(), pos.y(), 3.0),
+                rot: rot.0,
+            });
+        }
     }
 }

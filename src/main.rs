@@ -15,12 +15,14 @@ mod components;
 mod entities;
 mod resources;
 mod systems;
+mod events;
 mod utils;
 use resources::*;
 use systems::{
     cursor_pos_system, drag_system, move_system, player_input_system, screen_wrap_system, setup,
-    spawn_asteroid_system, visibility_system,
+    spawn_asteroid_system, visibility_system, spawn_projectile_system,
 };
+use events::SpawnProjectileEvent;
 
 fn main() {
     App::build()
@@ -39,7 +41,9 @@ fn main() {
         // .add_plugin(WgpuPlugin::default())
         // .add_plugin(PbrPlugin::default())
         // .add_plugin(WinitPlugin::default())
+        .add_event::<SpawnProjectileEvent>()
         .init_resource::<CursorPos>()
+        .init_resource::<SpawnProjectileListener>()
         .add_resource(ClearColor(Color::rgb(0.02, 0.02, 0.02)))
         .add_resource(AsteroidSpawnTimer(Timer::from_seconds(3.0)))
         // .add_resource(AssetHandles)
@@ -47,6 +51,7 @@ fn main() {
         .add_system(cursor_pos_system.system())
         .add_system(player_input_system.system())
         .add_system(spawn_asteroid_system.system())
+        .add_system(spawn_projectile_system.system())
         .add_system(move_system.system())
         .add_system(drag_system.system())
         .add_system(screen_wrap_system.system())

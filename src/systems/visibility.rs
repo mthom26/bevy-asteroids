@@ -17,7 +17,7 @@ pub fn visibility_system(
             || y < -arena_data.half_height
         {
             // Despawn entity
-            println!("Removing entity: {:?}", entity);
+            // println!("Removing entity: {:?}", entity);
             // Disable this for now until the following pull request is merged
             // https://github.com/bevyengine/bevy/pull/247
             // commands.despawn(entity);

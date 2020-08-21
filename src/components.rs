@@ -2,6 +2,11 @@ use bevy::math::Vec3;
 
 pub struct Player;
 
+pub struct Weapon {
+    pub reload_speed: f32,
+    pub reload_timer: f32,
+}
+
 pub struct Rot(pub f32);
 
 pub struct Velocity(pub Vec3);

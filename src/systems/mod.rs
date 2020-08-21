@@ -4,6 +4,7 @@ mod screen_wrap;
 mod setup;
 mod spawner;
 mod visibility;
+mod projectile_spawner;
 // mod test_player_bundle;
 
 pub use self::{
@@ -13,5 +14,6 @@ pub use self::{
     setup::setup,
     spawner::spawn_asteroid_system,
     visibility::visibility_system,
+    projectile_spawner::spawn_projectile_system,
     // test_player_bundle::test_player_bundle,
 };
