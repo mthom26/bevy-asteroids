@@ -31,7 +31,10 @@ pub fn spawn_asteroid_system(
             .with_bundle(AsteroidComponents {
                 // velocity: Velocity(Vec3::new(-250.0, 0.0, 0.0)),
                 // angular_velocity: AngularVelocity(-1.4),
-                rigid_body: RigidBodyBuilder::new_dynamic().translation(1280.0, 0.0).angvel(-1.4).linvel(-100.0, 0.0),
+                rigid_body: RigidBodyBuilder::new_dynamic()
+                    .translation(1280.0, 0.0)
+                    .angvel(-1.4)
+                    .linvel(-100.0, 0.0),
                 ..Default::default()
             });
 

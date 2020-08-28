@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier2d::{
+    na::{self, Vector2},
     physics::RigidBodyHandleComponent,
     rapier::dynamics::RigidBodySet,
-    na::{self, Vector2},
 };
 
 use crate::{
@@ -32,11 +32,7 @@ pub fn player_input_system(
     mut my_events: ResMut<Events<SpawnProjectileEvent>>,
     // cursor_moved_events: Res<Events<CursorMoved>>,
     mut body_set: ResMut<RigidBodySet>,
-    mut query: Query<(
-        &Player,
-        &RigidBodyHandleComponent,
-        &mut Weapon,
-    )>,
+    mut query: Query<(&Player, &RigidBodyHandleComponent, &mut Weapon)>,
 ) {
     for (_player, body_handle, mut weapon) in &mut query.iter() {
         let mut body = body_set.get_mut(body_handle.handle()).unwrap();
@@ -58,22 +54,23 @@ pub fn player_input_system(
 
         if let Some(force) = force.try_normalize(0.01) {
             let rotated_force = rotate_vec2_na(&force, body.position.rotation.angle());
-            body.apply_force(rotated_force * 800.0 * time.delta_seconds * 100.0);
+            body.apply_force(rotated_force * 10.0 / time.delta_seconds);
         }
 
         // Rotation
         let player_vec = rotate_vec2(&Vec2::new(0.0, 1.0), body.position.rotation.angle());
 
         let target_angle = Vec2::new(0.0, 1.0).angle_between(
-            cursor_pos_to_world_pos(&mouse_input_state.cursor_position) - Vec2::new(body.position.translation.x, body.position.translation.y)
+            cursor_pos_to_world_pos(&mouse_input_state.cursor_position)
+                - Vec2::new(body.position.translation.x, body.position.translation.y),
         );
         let target_vec = rotate_vec2(&Vec2::new(0.0, 1.0), target_angle);
         let rot_angle = player_vec.angle_between(target_vec);
 
         let target_ang_vel = rot_angle - body.angvel;
         let torque = target_ang_vel / (body.world_inv_inertia_sqrt * body.world_inv_inertia_sqrt);
-        let mut torque = torque * time.delta_seconds * 100.0;
-        
+        let mut torque = torque / time.delta_seconds;
+
         // Limit max rotational force produced
         if torque < -14000.0 {
             torque = -14000.0;
@@ -83,7 +80,7 @@ pub fn player_input_system(
         }
 
         body.apply_torque(torque);
-        
+
         // Limit max rotational velocity
         if body.angvel < -1.0 {
             body.angvel = -1.0;
@@ -100,7 +97,11 @@ pub fn player_input_system(
             // println!("Player Shoot");
             weapon.reload_timer = weapon.reload_speed;
             my_events.send(SpawnProjectileEvent {
-                pos: Translation::new(body.position.translation.x, body.position.translation.y, 3.0),
+                pos: Translation::new(
+                    body.position.translation.x,
+                    body.position.translation.y,
+                    3.0,
+                ),
                 rot: body.position.rotation.angle(),
             });
         }

@@ -1,13 +1,10 @@
 #![feature(clamp)]
 
 use bevy::{
-    input::keyboard::KeyboardInputState, input::mouse::MouseMotion,
-    prelude::*, render::pass::ClearColor, window::CursorMoved,
+    input::keyboard::KeyboardInputState, input::mouse::MouseMotion, prelude::*,
+    render::pass::ClearColor, window::CursorMoved,
 };
-use bevy_rapier2d::{
-    physics::{RapierPhysicsPlugin},
-};
-
+use bevy_rapier2d::physics::RapierPhysicsPlugin;
 
 mod components;
 mod entities;
@@ -15,11 +12,11 @@ mod events;
 mod resources;
 mod systems;
 mod utils;
-use events::{SpawnProjectileEvent};
+use events::SpawnProjectileEvent;
 use resources::*;
 use systems::{
-    cursor_pos_system, player_input_system, screen_wrap_system, setup,
-    spawn_asteroid_system, spawn_projectile_system, visibility_system,
+    cursor_pos_system, handle_physics_events_system, player_input_system, screen_wrap_system,
+    setup, spawn_asteroid_system, spawn_projectile_system, visibility_system,
 };
 
 pub const DENSITY: f32 = 0.002;
@@ -40,6 +37,7 @@ fn main() {
         .add_system(spawn_projectile_system.system())
         .add_system(screen_wrap_system.system())
         .add_system(visibility_system.system())
+        .add_system(handle_physics_events_system.system())
         // .add_system(test_player_bundle.system())
         // .add_system(print_mouse_events.system())
         .run();

@@ -1,13 +1,16 @@
 use bevy::prelude::*;
 
-use crate::events::{SpawnProjectileEvent};
+use crate::events::SpawnProjectileEvent;
 
 pub struct AsteroidSpawnTimer(pub Timer);
 
 pub struct AssetHandles {
+    // Textures
     // pub player_texture: Handle<ColorMaterial>,
     pub asteroid_texture: Handle<ColorMaterial>,
     pub projectile_texture: Handle<ColorMaterial>,
+    // Audio
+    pub weapon_fire: Handle<AudioSource>,
 }
 
 // Resource to store the current cursor position

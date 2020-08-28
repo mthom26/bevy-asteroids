@@ -1,5 +1,5 @@
 use bevy::{ecs::Bundle, prelude::*};
-use bevy_rapier2d::rapier::{dynamics::{RigidBodyBuilder}, geometry::ColliderBuilder};
+use bevy_rapier2d::rapier::{dynamics::RigidBodyBuilder, geometry::ColliderBuilder};
 
 use crate::{components::*, DENSITY};
 
@@ -33,7 +33,9 @@ impl Default for PlayerComponents {
             },
             // collider: Collider { radius: 50.0 },
             // collider_kind: ColliderKind(ColliderType::Player),
-            rigid_body: RigidBodyBuilder::new_dynamic().translation(0.0, 0.0).can_sleep(false),
+            rigid_body: RigidBodyBuilder::new_dynamic()
+                .translation(0.0, 0.0)
+                .can_sleep(false),
             collider: ColliderBuilder::ball(55.0).density(DENSITY),
         }
     }
@@ -60,7 +62,9 @@ impl Default for AsteroidComponents {
             screen_check: ScreenCheck,
             // collider: Collider { radius: 50.0 },
             // collider_kind: ColliderKind(ColliderType::Asteroid),
-            rigid_body: RigidBodyBuilder::new_dynamic().translation(0.0, 0.0).can_sleep(false),
+            rigid_body: RigidBodyBuilder::new_dynamic()
+                .translation(0.0, 0.0)
+                .can_sleep(false),
             collider: ColliderBuilder::ball(55.0).density(DENSITY),
         }
     }
@@ -74,6 +78,8 @@ pub struct ProjectileComponents {
     pub screen_check: ScreenCheck,
     // pub collider: Collider,
     // pub collider_kind: ColliderKind,
+    pub rigid_body: RigidBodyBuilder,
+    pub collider: ColliderBuilder,
 }
 
 impl Default for ProjectileComponents {
@@ -85,6 +91,8 @@ impl Default for ProjectileComponents {
             screen_check: ScreenCheck,
             // collider: Collider { radius: 10.0 },
             // collider_kind: ColliderKind(ColliderType::Projectile),
+            rigid_body: RigidBodyBuilder::new_dynamic().translation(0.0, 0.0),
+            collider: ColliderBuilder::ball(16.0).sensor(true),
         }
     }
 }

@@ -1,10 +1,15 @@
 use bevy::prelude::*;
-use bevy_rapier2d::{na::Vector2, physics::Gravity};
+use bevy_rapier2d::{
+    na::Vector2,
+    physics::Gravity,
+    rapier::{dynamics::RigidBodyBuilder, geometry::ColliderBuilder},
+};
 
 use crate::{
     components::*,
     entities::{AsteroidComponents, PlayerComponents},
     resources::{ArenaData, AssetHandles},
+    DENSITY,
 };
 
 pub fn setup(
@@ -28,12 +33,17 @@ pub fn setup(
         .load("assets/textures/projectile.png")
         .expect("Could not load projectile texture");
 
+    let weapon_fire = asset_server
+        .load("assets/sfx/weaponfire6.wav")
+        .expect("Could not load weapon fire audio");
+
     gravity.0 = Vector2::new(0.0, 0.0);
 
     commands.insert_resource(AssetHandles {
         // player_texture: materials.add(player_texture.into()),
         asteroid_texture: materials.add(asteroid_texture.into()),
         projectile_texture: materials.add(projectile_texture.into()),
+        weapon_fire,
     });
 
     // The arena size is the screen size multiplied by 2.0 (camera scale)
@@ -72,8 +82,10 @@ pub fn setup(
     //     ..Default::default()
     // })
     // .with_bundle(AsteroidComponents {
-    //     velocity: Velocity(Vec3::new(-100.0, -180.0, 0.0)),
-    //     angular_velocity: AngularVelocity(0.4),
+    //     rigid_body: RigidBodyBuilder::new_dynamic()
+    //             .translation(300.0, 0.0)
+    //             .can_sleep(false),
+    //         collider: ColliderBuilder::ball(55.0).density(DENSITY),
     //     ..Default::default()
     // });
 }

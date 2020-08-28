@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_rapier2d::rapier::dynamics::RigidBodyBuilder;
 
 use crate::{
     entities::ProjectileComponents,
@@ -10,6 +11,7 @@ use crate::{
 pub fn spawn_projectile_system(
     mut commands: Commands,
     assets: Res<AssetHandles>,
+    audio_output: Res<AudioOutput>,
     mut event_reader_resource: ResMut<SpawnProjectileListener>,
     events: Res<Events<SpawnProjectileEvent>>,
 ) {
@@ -19,7 +21,12 @@ pub fn spawn_projectile_system(
         //     event.pos, event.rot
         // );
         // TODO - Projectile should probably store its own velocity somewhere
-        let vel = rotate_vec2(&Vec2::new(0.0, 400.0), event.rot);
+        let vel = rotate_vec2(&Vec2::new(0.0, 100.0), event.rot);
+
+        let rigid_body = RigidBodyBuilder::new_dynamic()
+            .translation(event.pos.x(), event.pos.y())
+            .rotation(event.rot)
+            .linvel(vel.x(), vel.y());
 
         commands
             .spawn(SpriteComponents {
@@ -31,7 +38,11 @@ pub fn spawn_projectile_system(
             .with_bundle(ProjectileComponents {
                 // rot: Rot(event.rot),
                 // velocity: Velocity(Vec3::new(vel.x(), vel.y(), 0.0)),
+                rigid_body,
                 ..Default::default()
             });
+
+        // Play audio
+        audio_output.play(assets.weapon_fire);
     }
 }

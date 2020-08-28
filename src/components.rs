@@ -12,4 +12,3 @@ pub struct ScreenWrap;
 
 // Marker to check if an object has left the screen
 pub struct ScreenCheck;
-
