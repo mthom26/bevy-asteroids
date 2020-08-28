@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 
-use crate::events::SpawnProjectileEvent;
+use crate::events::{SpawnProjectileEvent};
 
 pub struct AsteroidSpawnTimer(pub Timer);
 
 pub struct AssetHandles {
     // pub player_texture: Handle<ColorMaterial>,
     pub asteroid_texture: Handle<ColorMaterial>,
+    pub projectile_texture: Handle<ColorMaterial>,
 }
 
 // Resource to store the current cursor position
@@ -24,5 +25,5 @@ pub struct ArenaData {
 
 #[derive(Default)]
 pub struct SpawnProjectileListener {
-    pub event_reader: EventReader<SpawnProjectileEvent>
-} 
+    pub event_reader: EventReader<SpawnProjectileEvent>,
+}

@@ -1,27 +1,28 @@
 use bevy::prelude::*;
+use bevy_rapier2d::{physics::RigidBodyHandleComponent, rapier::dynamics::RigidBodySet};
 
 use crate::{components::*, resources::ArenaData};
 
 pub fn screen_wrap_system(
     arena_data: Res<ArenaData>,
-    mut query: Query<(&ScreenWrap, &mut Translation)>,
+    mut body_set: ResMut<RigidBodySet>,
+    mut query: Query<(&ScreenWrap, &RigidBodyHandleComponent)>,
 ) {
-    for (_, mut translation) in &mut query.iter() {
-        let mut new_x = translation.0.x();
-        let mut new_y = translation.0.y();
+    for (_, body_handle) in &mut query.iter() {
+        let mut body = body_set.get_mut(body_handle.handle()).unwrap();
+        let x = body.position.translation.x;
+        let y = body.position.translation.y;
 
-        if new_x > arena_data.half_width {
-            new_x = -arena_data.half_width;
-        } else if new_x < -arena_data.half_width {
-            new_x = arena_data.half_width;
+        if x > arena_data.half_width {
+            body.position.translation.x = -arena_data.half_width;
+        } else if x < -arena_data.half_width {
+            body.position.translation.x = arena_data.half_width;
         }
 
-        if new_y > arena_data.half_height {
-            new_y = -arena_data.half_height;
-        } else if new_y < -arena_data.half_height {
-            new_y = arena_data.half_height;
+        if y > arena_data.half_height {
+            body.position.translation.y = -arena_data.half_height;
+        } else if y < -arena_data.half_height {
+            body.position.translation.y = arena_data.half_height;
         }
-
-        translation.0 = Vec3::new(new_x, new_y, translation.0.z());
     }
 }

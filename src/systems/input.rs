@@ -1,9 +1,14 @@
 use bevy::prelude::*;
+use bevy_rapier2d::{
+    physics::RigidBodyHandleComponent,
+    rapier::dynamics::RigidBodySet,
+    na::{self, Vector2},
+};
 
 use crate::{
     components::*,
-    utils::{cursor_pos_to_world_pos, rotate_vec2},
     events::SpawnProjectileEvent,
+    utils::{cursor_pos_to_world_pos, rotate_vec2, rotate_vec2_na},
     CursorPos,
 };
 
@@ -26,71 +31,66 @@ pub fn player_input_system(
     mouse_input: Res<Input<MouseButton>>,
     mut my_events: ResMut<Events<SpawnProjectileEvent>>,
     // cursor_moved_events: Res<Events<CursorMoved>>,
+    mut body_set: ResMut<RigidBodySet>,
     mut query: Query<(
         &Player,
-        &Translation,
-        &Rot,
-        &mut Velocity,
-        &mut AngularVelocity,
+        &RigidBodyHandleComponent,
         &mut Weapon,
     )>,
 ) {
-    let mut x = 0.0;
-    if keyboard_input.pressed(KeyCode::A) {
-        x -= 1.0;
-    }
-    if keyboard_input.pressed(KeyCode::D) {
-        x += 1.0;
-    }
+    for (_player, body_handle, mut weapon) in &mut query.iter() {
+        let mut body = body_set.get_mut(body_handle.handle()).unwrap();
 
-    let mut y = 0.0;
-    if keyboard_input.pressed(KeyCode::S) {
-        y -= 1.0;
-    }
-    if keyboard_input.pressed(KeyCode::W) {
-        y += 1.0;
-    }
+        let mut force = Vector2::new(0.0, 0.0);
 
-    let input_vec = if x != 0.0 || y != 0.0 {
-        Vec2::new(x, y).normalize()
-    } else {
-        Vec2::zero()
-    };
+        if keyboard_input.pressed(KeyCode::A) {
+            force.x -= 1.0;
+        }
+        if keyboard_input.pressed(KeyCode::D) {
+            force.x += 1.0;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            force.y += 1.0;
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            force.y -= 1.0;
+        }
 
-    for (_player, pos, rot, mut velocity, mut ang_velocity, mut weapon) in &mut query.iter() {
-        let input_vec = rotate_vec2(&input_vec, rot.0);
-        let input_vec = Vec3::new(input_vec.x(), input_vec.y(), 0.0);
-        velocity.0 += input_vec * time.delta_seconds * 200.0;
+        if let Some(force) = force.try_normalize(0.01) {
+            let rotated_force = rotate_vec2_na(&force, body.position.rotation.angle());
+            body.apply_force(rotated_force * 800.0 * time.delta_seconds * 100.0);
+        }
 
-        let player_vec = rotate_vec2(&Vec2::new(0.0, 1.0), rot.0);
-        // println!("player_vec: {}", player_vec);
+        // Rotation
+        let player_vec = rotate_vec2(&Vec2::new(0.0, 1.0), body.position.rotation.angle());
 
         let target_angle = Vec2::new(0.0, 1.0).angle_between(
-            cursor_pos_to_world_pos(&mouse_input_state.cursor_position)
-                - Vec2::new(pos.0.x(), pos.0.y()),
+            cursor_pos_to_world_pos(&mouse_input_state.cursor_position) - Vec2::new(body.position.translation.x, body.position.translation.y)
         );
-        let tgt_vec = rotate_vec2(&Vec2::new(0.0, 1.0), target_angle);
-        // println!("tgt_vec: {}", tgt_vec);
+        let target_vec = rotate_vec2(&Vec2::new(0.0, 1.0), target_angle);
+        let rot_angle = player_vec.angle_between(target_vec);
 
-        // Actual angle between current player direction and cursor direction
-        let rot_angle = player_vec.angle_between(tgt_vec);
+        let target_ang_vel = rot_angle - body.angvel;
+        let torque = target_ang_vel / (body.world_inv_inertia_sqrt * body.world_inv_inertia_sqrt);
+        let mut torque = torque * time.delta_seconds * 100.0;
+        
+        // Limit max rotational force produced
+        if torque < -14000.0 {
+            torque = -14000.0;
+        }
+        if torque > 14000.0 {
+            torque = 14000.0;
+        }
 
-        let acc = 144.0;
-
-        // Take into account current angular velocity
-        let tgt_ang_vel = (1.0 * rot_angle) - (0.2 * ang_velocity.0);
-        // Clamp it so acceleration is not instant
-        let tgt_ang_vel = tgt_ang_vel.clamp(-0.08, 0.08);
-        // println!("tgt_ang_vel: {}", tgt_ang_vel);
-
-        ang_velocity.0 += tgt_ang_vel * time.delta_seconds * acc;
-        // clamp max speed
-        ang_velocity.0 = ang_velocity.0.clamp(-3.0, 3.0);
-
-        // println!("tgt_ang_vel: {}", tgt_ang_vel);
-        // println!("ang_vel: {}", ang_velocity.0);
-        // println!();
-
+        body.apply_torque(torque);
+        
+        // Limit max rotational velocity
+        if body.angvel < -1.0 {
+            body.angvel = -1.0;
+        }
+        if body.angvel > 1.0 {
+            body.angvel = 1.0;
+        }
 
         // Decrement Weapon reload time, this should probably be in another system
         // but it is fine here for now
@@ -100,8 +100,8 @@ pub fn player_input_system(
             // println!("Player Shoot");
             weapon.reload_timer = weapon.reload_speed;
             my_events.send(SpawnProjectileEvent {
-                pos: Translation::new(pos.x(), pos.y(), 3.0),
-                rot: rot.0,
+                pos: Translation::new(body.position.translation.x, body.position.translation.y, 3.0),
+                rot: body.position.rotation.angle(),
             });
         }
     }

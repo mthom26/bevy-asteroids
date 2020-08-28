@@ -18,8 +18,7 @@ pub fn visibility_system(
         {
             // Despawn entity
             // println!("Removing entity: {:?}", entity);
-            // Disable this for now until the following pull request is merged
-            // https://github.com/bevyengine/bevy/pull/247
+            // Disable this for now - https://github.com/bevyengine/bevy/issues/299
             // commands.despawn(entity);
         }
     }

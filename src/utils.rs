@@ -1,4 +1,5 @@
 use bevy::math::Vec2;
+use bevy_rapier2d::na::Vector2;
 
 // Rotate a Vec2 by `angle` in radians
 pub fn rotate_vec2(v: &Vec2, angle: f32) -> Vec2 {
@@ -6,6 +7,14 @@ pub fn rotate_vec2(v: &Vec2, angle: f32) -> Vec2 {
     let c = angle.cos();
 
     Vec2::new(v.x() * c - v.y() * s, v.y() * c + v.x() * s)
+}
+
+// Rotate an `nalgebra` Vector2 by `angle` in radians
+pub fn rotate_vec2_na(v: &Vector2<f32>, angle: f32) -> Vector2<f32> {
+    let s = angle.sin();
+    let c = angle.cos();
+
+    Vector2::new(v.x * c - v.y * s, v.y * c + v.x * s)
 }
 
 // Convert cursor pos to world position

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_rapier2d::{na::Vector2, physics::Gravity};
 
 use crate::{
     components::*,
@@ -8,8 +9,9 @@ use crate::{
 
 pub fn setup(
     mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
     asset_server: Res<AssetServer>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut gravity: ResMut<Gravity>,
     // windows: Res<Windows>,
 ) {
     // This window is `None` in the startup system but not in regular systems
@@ -22,10 +24,16 @@ pub fn setup(
     let asteroid_texture: Handle<Texture> = asset_server
         .load("assets/textures/asteroid.png")
         .expect("Could not load asteroid texture");
+    let projectile_texture: Handle<Texture> = asset_server
+        .load("assets/textures/projectile.png")
+        .expect("Could not load projectile texture");
+
+    gravity.0 = Vector2::new(0.0, 0.0);
 
     commands.insert_resource(AssetHandles {
         // player_texture: materials.add(player_texture.into()),
         asteroid_texture: materials.add(asteroid_texture.into()),
+        projectile_texture: materials.add(projectile_texture.into()),
     });
 
     // The arena size is the screen size multiplied by 2.0 (camera scale)
@@ -52,7 +60,7 @@ pub fn setup(
             ..Default::default()
         })
         .with_bundle(PlayerComponents {
-            drag: Drag::new(0.4, 0.0),
+            // drag: Drag::new(0.4, 0.0),
             ..Default::default()
         });
 

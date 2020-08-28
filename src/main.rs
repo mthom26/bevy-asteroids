@@ -1,59 +1,43 @@
 #![feature(clamp)]
 
 use bevy::{
-    app::ScheduleRunnerPlugin, input::keyboard::KeyboardInputState, input::mouse::MouseMotion,
+    input::keyboard::KeyboardInputState, input::mouse::MouseMotion,
     prelude::*, render::pass::ClearColor, window::CursorMoved,
 };
+use bevy_rapier2d::{
+    physics::{RapierPhysicsPlugin},
+};
 
-// use bevy::{
-//     asset::AssetPlugin, core::CorePlugin, diagnostic::DiagnosticsPlugin, input::InputPlugin,
-//     pbr::PbrPlugin, render::RenderPlugin, sprite::SpritePlugin, transform::TransformPlugin,
-//     type_registry::TypeRegistryPlugin, wgpu::WgpuPlugin, window::WindowPlugin, winit::WinitPlugin,
-// };
 
 mod components;
 mod entities;
+mod events;
 mod resources;
 mod systems;
-mod events;
 mod utils;
+use events::{SpawnProjectileEvent};
 use resources::*;
 use systems::{
-    cursor_pos_system, drag_system, move_system, player_input_system, screen_wrap_system, setup,
-    spawn_asteroid_system, visibility_system, spawn_projectile_system,
+    cursor_pos_system, player_input_system, screen_wrap_system, setup,
+    spawn_asteroid_system, spawn_projectile_system, visibility_system,
 };
-use events::SpawnProjectileEvent;
+
+pub const DENSITY: f32 = 0.002;
 
 fn main() {
     App::build()
-        // ScheduleRunnerPlugin has no effect
-        // .add_plugin(ScheduleRunnerPlugin::run_loop(std::time::Duration::from_secs_f32(1.0 / 60.0)))
         .add_default_plugins()
-        // .add_plugin(TypeRegistryPlugin::default())
-        // .add_plugin(CorePlugin::default())
-        // .add_plugin(TransformPlugin::default())
-        // .add_plugin(DiagnosticsPlugin::default())
-        // .add_plugin(InputPlugin::default())
-        // .add_plugin(WindowPlugin::default())
-        // .add_plugin(AssetPlugin::default())
-        // .add_plugin(RenderPlugin::default())
-        // .add_plugin(SpritePlugin::default())
-        // .add_plugin(WgpuPlugin::default())
-        // .add_plugin(PbrPlugin::default())
-        // .add_plugin(WinitPlugin::default())
+        .add_plugin(RapierPhysicsPlugin)
         .add_event::<SpawnProjectileEvent>()
         .init_resource::<CursorPos>()
         .init_resource::<SpawnProjectileListener>()
         .add_resource(ClearColor(Color::rgb(0.02, 0.02, 0.02)))
-        .add_resource(AsteroidSpawnTimer(Timer::from_seconds(3.0)))
-        // .add_resource(AssetHandles)
+        .add_resource(AsteroidSpawnTimer(Timer::from_seconds(3.0, true)))
         .add_startup_system(setup.system())
         .add_system(cursor_pos_system.system())
         .add_system(player_input_system.system())
         .add_system(spawn_asteroid_system.system())
         .add_system(spawn_projectile_system.system())
-        .add_system(move_system.system())
-        .add_system(drag_system.system())
         .add_system(screen_wrap_system.system())
         .add_system(visibility_system.system())
         // .add_system(test_player_bundle.system())
